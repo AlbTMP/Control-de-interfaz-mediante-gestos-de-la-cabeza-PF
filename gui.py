@@ -21,7 +21,6 @@ class FloatingRadialUI:
 
 
 
-
         self.radius = 45
         self.circle_r = 30
         self.offset = 40
@@ -44,13 +43,13 @@ class FloatingRadialUI:
         
 
         ####################################
-        self.group_chars = [
+        self.grupo_letras = [
             #"e","y","()","v","o","g","a","h"
             #v","()","y","o","e","g","a","h
-            ["()","Y","o","e","g","a","h","v"],   # sector 0 (abajo)
-            ["u",",","t","l",":","c","#","."],   # sector 1 (izq)
-            ["d","k","b","m","w","p","ñ","x"],   # sector 2 (arriba)
-            ["r","f","i","s","z","n","j","q"]    # sector 3 (der)
+            ["()","Y","o","e","g","a","h","v"],   # 0 (abajo)
+            ["u",",","t","l",":","c","#","."],   #  1 (izq)
+            ["d","k","b","m","w","p","ñ","x"],   # 2 (arriba)
+            ["r","f","i","s","z","n","j","q"]    # 3 (derecgha)
         ]
         ######################################
 
@@ -76,31 +75,26 @@ class FloatingRadialUI:
 
 
          ##############
-        #self.state = 4                     # 4 or 8
-        self.highlight_index = None        # sector actual
-        self.stable_frames = 0             # contador para confirmar selección
-        self.FRAMES_TO_CONFIRM = 5         # ajusta 50 ms * 5 = 250 ms
-        #self.draw_menu()                   # dibuja 4 inicialmente
+       
+        self.resaltar_index = None        # sector actual
+        self.stable_frames = 0             # contador 
+        self.FRAMES_TO_CONFIRM = 5         
+        #self.draw_menu()                  
 
 
         self.state        = _State.IN_4
-        self.center_frames = 0          # frames seguidos en dead-zone
-        self.CENTER_FRAMES_NEEDED = 4   # 4·50 ms = 200 ms
+        self.center_frames = 0          
+        self.CENTER_FRAMES_NEEDED = 4   
         #################
-
-
 
 
         self.draw_menu()
         self.follow_mouse()
-
-        # simulación de entrada MPU
+  
         self.pitch = 0
         self.yaw = 0
         self.update_from_mpu()
         self.win.withdraw()
-
-
         
 
     def draw_menu(self):
@@ -147,14 +141,14 @@ class FloatingRadialUI:
         self.win.geometry(f"+{x + self.offset}+{y + self.offset}")
         self.root.after(16, self.follow_mouse)
 
-    # 🔥 Integración MPU (aquí conectas tu serial)
+
     def update_from_mpu(self):
 
         #################################
         idx = self.direction_from_angles(self.pitch, self.yaw)
         in_center = (idx is None)
 
-    # --------- gestión de “volver al centro” ---------
+    # --------- volver al centro ---------
         if self.state in (_State.WAIT_CENTER_4, _State.WAIT_CENTER_8):
             if in_center:
                 self.center_frames += 1
@@ -162,7 +156,7 @@ class FloatingRadialUI:
                     self.center_frames = 0
                     if self.state == _State.WAIT_CENTER_4:
                         self.expand_to_8()
-                    else:  # WAIT_CENTER_8
+                    else:  
                         self.collapse_to_4()
             else:
                 self.center_frames = 0
@@ -170,18 +164,18 @@ class FloatingRadialUI:
             self.root.after(50, self.update_from_mpu)
             return
 
-        # --------- estados normales IN_4 / IN_8 ---------
+        # --------- estados 4 luego 8 ---------
         if in_center:
             self.stable_frames = 0
             self.highlight(-1)
         else:
-            if idx == self.highlight_index:
+            if idx == self.resaltar_index:
                 self.stable_frames += 1
                 if self.stable_frames >= self.FRAMES_TO_CONFIRM:
                     self.select_current(idx)
             else:
                 self.stable_frames = 0
-                self.highlight_index = idx
+                self.resaltar_index = idx
                 self.highlight(idx)
 
         self.root.after(50, self.update_from_mpu)
@@ -189,19 +183,11 @@ class FloatingRadialUI:
 
 
 
-        # ---- SIMULACIÓN ----
+        # ---- simulacion ----
         #self.pitch = random.uniform(-30, 30)
         #self.yaw = random.uniform(-30, 30)
         # --------------------
-        """
-        index = self.direction_from_angles(self.pitch, self.yaw)
-        if index is not None:
-            self.highlight(index)
-        else:
-            self.highlight(-1)
-
-        self.root.after(200, self.update_from_mpu)
-        """
+   
 
 
     # ---------- acción de entrar/salir ----------
@@ -220,20 +206,10 @@ class FloatingRadialUI:
 
     def key_action(self, idx8):
         sector = self.selected_sector
-        char   = self.group_chars[sector][idx8]
+        char   = self.grupo_letras[sector][idx8]
         self.accionar = char
         print("KEY ->", char)
-    # controles.send_key(char)   # cuando quieras integrarlo
-    # controles.send_key(char)   # cuando quieras integrarlo
 
-
-
-
-        """Aquí envías la tecla que corresponda al PCController"""
-        # ejemplo: mapeo directo a una lista de strings
-        #keys = ["a","b","c","d","e","f","g","h"]
-        #print("KEY:", keys[idx8])
-        # controles.send_key(keys[idx8])   # descomenta cuando tengas la instancia
 
     
     def direction_from_angles(self, pitch, yaw):
@@ -309,8 +285,8 @@ class FloatingRadialUI:
 
     #========================= 8 CIRSULOS
     def draw_menu2(self):
-        cx, cy = 100, 100  # Coordenadas del centro
-        angles = [i * 45 for i in range(8)]  # Ángulos para 8 círculos, separados por 45°
+        cx, cy = 100, 100  # Centro
+        angles = [i * 45 for i in range(8)]  
 
         for label, ang in zip(self.labels, angles):
             rad = math.radians(ang)
@@ -341,10 +317,10 @@ class FloatingRadialUI:
 
         #===================NUEVOS
 
-        # ---------- acción de entrar/salir ----------
+        # ----------  entrarysalir ----------
     def select_current(self, idx):
         if self.state == _State.IN_4:
-            if 0 <= idx <= 3:              # guarda solo si es válido
+            if 0 <= idx <= 3:              # validar
                 self.selected_sector = idx
                 self.state = _State.WAIT_CENTER_4
         elif self.state == _State.IN_8:
@@ -357,7 +333,7 @@ class FloatingRadialUI:
         self.items.clear()
         self.texts.clear()
         self.state = _State.IN_4
-        self.draw_menu()      # tu método original de 4
+        self.draw_menu()      
   
 
 
@@ -372,7 +348,7 @@ class FloatingRadialUI:
         self.texts.clear()
         self.state = _State.IN_8
         sector4 = self.selected_sector
-        #print("ññññññaaaaaaaa",sector4)
+        #print("aa",sector4)
         #if sector4 ==6:
         #    sector4=2
         #    self.selected_sector = 2
@@ -380,8 +356,8 @@ class FloatingRadialUI:
         #if sector4 ==4:
         #    sector4=3
         #    self.selected_sector = 3
-        print("ññññññaaaaaaaa",sector4)
-        chars = self.group_chars[sector4]   # ← letras correspondientes
+        print("aaaaaaa",sector4)
+        chars = self.grupo_letras[sector4]   
         
         cx, cy = 100, 100
         angles = [(i * 45 + 90) % 360 for i in range(8)]

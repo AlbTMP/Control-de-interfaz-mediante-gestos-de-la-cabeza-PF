@@ -12,12 +12,11 @@ from gui import FloatingRadialUI
 
 
 
-# --- Estado para activar el teclado ---
-abajo_inicio = None  # timestamp cuando se inclinó hacia abajo
+abajo_inicio = None  
 esperando_volver = False
 INTERFAZ_ACTIVA = False
-UMBRAL_ABAJO = 12  # grados de inclinación hacia abajo
-TIEMPO_ABAJO = 6.0  # segundos
+UMBRAL_ABAJO = 12  
+TIEMPO_ABAJO = 7.0  
 
 
 
@@ -37,19 +36,15 @@ if ARDUINO_PORT is None:
 
 root = tk.Tk()
 #root.geometry("400x300")
-#root.title("Tooltip que sigue al mouse")
 
 root.withdraw()
 ui = FloatingRadialUI(root)
 ALTO_PANTALLA = root.winfo_screenheight()
 
 
-
 serial = SerialRead(ARDUINO_PORT,BAUD_RATE)
 tracker = Traker()
 controles = PCController(3)
-#interfaz = BurbujaMouse(root, "rotar derecha para activar teclado")
-
 
 #root.mainloop()
 
@@ -64,7 +59,7 @@ def on_press(key):
 ### bucle- whil
 
 def leer_mpu(cad):
-    #print("awebo",cad)
+   
     cad = serial.read_data()
     try:
 
@@ -93,7 +88,7 @@ def leer_mpu(cad):
 def bucle_1():
     global salir
     if ARDUINO_PORT is None and salir == False:
-        print("No se encontró ningún Arduino conectado.")
+        print("No se encontró ningun Arduino conectado.")
         salir=True
     else:
         print(f"Arduino encontrado en: {ARDUINO_PORT}")
@@ -117,7 +112,6 @@ def bucle_1():
                        continue
                 try:
                     #if controles.usuario_entro_en_campo_texto():
-
                      #   root.mainloop()
                     leer_mpu(cad)
                     #x, y , z, a,b , c,m= tracker.procesar_entrada_serial(cad)#get_variables(cad)
@@ -145,11 +139,7 @@ def bucle_1():
                     #ui.direction_from_angles(x,z)
                         controles.clicks_mouse_p2(y)
 
-
-
                     #controles.detectar_palabra_en_serial(m)jz
-
-
 
 
                     if salir == True:
@@ -158,19 +148,14 @@ def bucle_1():
                     
 
                 except ValueError:
-                # Si la línea no tiene 2 números, simplemente la ignoramos
+                
                     continue
 
         except serial.SerialException as e:
             print(f"No se pudo conectar al Arduino: {e}")
 
-
-
 hilo_clic = threading.Thread(target=bucle_1,daemon=True)
 hilo_clic.start()
-
-
-
 
 
 
@@ -188,7 +173,7 @@ def update_gui():
         ui.pitch = pitch
         ui.yaw = yaw
 
-        # --- Lógica de activación ---
+        # --- activar interfaz
         if not INTERFAZ_ACTIVA:
             if yaw > UMBRAL_ABAJO and abajo_inicio is None:
                 abajo_inicio = time.time()
@@ -198,18 +183,18 @@ def update_gui():
                     esperando_volver = True
                     abajo_inicio = None
 
-            elif esperando_volver and abs(yaw) < 5:  # volvió a 0°
+            elif esperando_volver and abs(yaw) < 5:  
                 ###################para dimension de pantalla
                 
                 # ----------------------------------------------
                 INTERFAZ_ACTIVA = True
                 esperando_volver = False
-                ui.win.deiconify()  # Muestra la interfaz
+                ui.win.deiconify()  
                 print("[INFO] Interfaz activada.")
                 controles.centrar()
 
         else:
-            # Si la interfaz está activa, actualiza el highlightz
+            
             ui.direction_from_angles(pitch, yaw)
             if ui.accionar != "non":
                 controles.escribir_letra(ui.accionar)
@@ -221,18 +206,15 @@ def update_gui():
                 ui.win.withdraw()
                 print("[INFO] Interfaz cerrada.")
             
-            # --- Borrar con roll derecho ---
+            
             #if not INTERFAZ_ACTIVA and roll > 
-            if y > 12:  # ajusta el umbral
-                controles.escribir_letra("borrar")  # o usa controles.send_key(Key.backspace)
+            if y > 12:  
+                controles.escribir_letra("borrar")  
 
     except Exception as e:
         print("Error en update_gui:", e)
 
     root.after(50, update_gui)
-
-
-
 
 
 
@@ -255,38 +237,8 @@ def update_gui():
     root.after(50, update_gui)   # 20 Hz es suficiente
 """
 
-# ---------- arranque ----------
-update_gui()      # primera llamada
+
+update_gui()      
 
 root.deiconify()
 root.mainloop()
-#if salir == True:
-#    root.quit()
-
-"""
-try:
-    root.mainloop()   # Esto mantiene la GUI en ejecución, sin bloquear la lectura serial
-except KeyboardInterrupt:
-    print("Interrupción detectada, cerrando el programa.")
-    salir = True
-    root.quit()  # Salir de Tkinter de forma ordenada
-#root.mainloop()   # <-- SIEMPRE en el hilo principal
-
-try:
-    root.deiconify()  # Muestra la ventana de la GUI
-    root.mainloop()   # Esto mantiene la GUI en ejecución, sin bloquear la lectura serial
-except Exception as e:
-    print(f"Error en Tkinter: {e}")
-finally:
-    # Asegúrate de cerrar cualquier recurso y detener hilos al salir
-    print("Cerrando el programa...")
-
-    # Paramos todos los hilos de manera segura
-    Salir = True
-    hilo_mouse.join()  # Espera a que termine el hilo de lectura de datos
-    hilo_clic.join()   # Espera a que termine el hilo de clics
-
-    # Cierra la interfaz gráfica de manera ordenada
-    root.quit()
-    root.destroy()
-    """

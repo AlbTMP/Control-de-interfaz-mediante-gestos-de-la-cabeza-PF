@@ -17,7 +17,7 @@ class SerialRead:
             return None
     
     def find_arduino():
-        """Busca el puerto donde está conectado Arduino."""
+    
         ports = serial.tools.list_ports.comports()
         for port in ports:
             # Arduino suele tener 'Arduino' en la descripción o un VID/PID conocido
@@ -42,5 +42,5 @@ class SerialRead:
             except serial.SerialException:
                 continue
     
-        print("No se pudo encontrar un puerto Bluetooth válido.")
+        print("No se pudo encontrar un puerto Bluetooth.")
         return None
